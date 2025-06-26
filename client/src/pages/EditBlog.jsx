@@ -2,8 +2,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import { useAuth } from "../context/AuthContext";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Toolbar from '../components/Toolbar';
 
 const categories = [
   "motivation",
@@ -31,6 +33,24 @@ export default function EditBlog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize Tiptap editor
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-[#1ABC9C] hover:text-[#16A085] underline',
+        },
+      }),
+    ],
+    content: form.content,
+    onUpdate: ({ editor }) => {
+      setForm({ ...form, content: editor.getHTML() });
+    },
+  });
 
   const fetchBlog = async () => {
     try {
@@ -44,6 +64,10 @@ export default function EditBlog() {
         category: res.data.category,
         content: res.data.content,
       });
+      // Set editor content once it's available
+      if (editor) {
+        editor.commands.setContent(res.data.content);
+      }
     } catch (err) {
       setError("Failed to load blog data");
     } finally {
@@ -55,23 +79,30 @@ export default function EditBlog() {
     fetchBlog();
   }, [id]);
 
+  // Update editor content when form.content changes
+  useEffect(() => {
+    if (editor && form.content !== editor.getHTML()) {
+      editor.commands.setContent(form.content);
+    }
+  }, [form.content, editor]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleContentChange = (value) => {
-    setForm({ ...form, content: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
+
     try {
       const res = await axios.put(`/blogs/${id}`, form);
       setSuccess("Blog updated successfully!");
       setTimeout(() => navigate(`/blogs/${res.data._id}`), 1000);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to update blog");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,20 +181,13 @@ export default function EditBlog() {
               <label className="block text-gray-700 font-medium mb-2">
                 Content
               </label>
-              <ReactQuill
-                value={form.content}
-                onChange={handleContentChange}
-                modules={{
-                  toolbar: [
-                    [{ header: [1, 2, false] }],
-                    ["bold", "italic", "underline", "strike"],
-                    [{ list: "ordered" }, { list: "bullet" }],
-                    ["link", "image"],
-                    ["clean"],
-                  ],
-                }}
-                className="bg-white rounded-lg border-gray-300"
-              />
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <Toolbar editor={editor} />
+                <EditorContent
+                  editor={editor}
+                  className="min-h-[300px] p-4 bg-white focus:outline-none prose max-w-none"
+                />
+              </div>
             </div>
 
             <div className="pt-4 flex gap-4">
@@ -176,9 +200,22 @@ export default function EditBlog() {
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-[#1ABC9C] hover:bg-[#16A085] text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                disabled={isSubmitting}
+                className={`flex-1 bg-[#1ABC9C] hover:bg-[#16A085] text-white font-medium py-3 px-4 rounded-lg transition-colors ${
+                  isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
               >
-                Update Post
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
+                ) : (
+                  'Update Post'
+                )}
               </button>
             </div>
           </form>

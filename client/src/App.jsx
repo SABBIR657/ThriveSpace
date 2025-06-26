@@ -9,6 +9,7 @@ import CreateBlog from "./pages/CreateBlog";
 import BlogDetails from "./pages/BlogDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditBlog from "./pages/EditBlog";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <div className="max-w-5xl mx-auto p-4">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile/>}/>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route

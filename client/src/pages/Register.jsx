@@ -194,6 +194,18 @@ const Register = () => {
                 Sign in instead
               </Link>
             </div>
+            <div className="mt-0 py-6 border-t border-gray-200 text-center">
+              <div className="container mx-auto px-4">
+                <p className="text-gray-600 text-sm">
+                  &copy; {new Date().getFullYear()} Sabbir Rahman. All rights
+                  reserved.
+                </p>
+                <p className="text-gray-500 text-xs mt-2">
+                  The content and images on this site are protected by copyright
+                  law.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ commentOnBlog,
 updateBlog,
 deleteBlog
 } = require('../controllers/blogController')
+const sanitize = require('../middlewares/sanitize')
 
 
 // Public - Get all blogs
