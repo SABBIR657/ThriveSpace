@@ -2,7 +2,6 @@ import { useState } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import ReactQuill from "react-quill";
 
 const categories = [
   "motivation",
@@ -38,71 +37,98 @@ export default function CreateBlog() {
     e.preventDefault();
     setError("");
 
-    console.log("sending:", form);
     try {
       const res = await axios.post("/blogs", form);
-
       setSuccess("Blog posted successfully!");
       setTimeout(() => {
         navigate(`/blogs/${res.data._id}`);
       }, 1000);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to post blog");
-      // console.error("Error response:", err?.response?.data || err.message);
-      // setError("Failed to post blog. Check console for details.");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-semibold mb-6 text-center">Write a Blog</h1>
+    <div className="min-h-screen bg-[#ECF0F1] py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <h1 className="text-3xl font-bold text-center text-[#2C3E50] mb-8">
+            Create New Post
+          </h1>
 
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      {success && <p className="text-green-600 text-center mb-4">{success}</p>}
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+              {success}
+            </div>
+          )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Blog Title"
-          required
-          className="w-full p-3 border border-gray-300 rounded"
-        />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Your blog title..."
+                required
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent"
+              />
+            </div>
 
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded text-gray-600"
-        >
-          <option value="">Select a category</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Category
+              </label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                required
+                className="w-full p-4 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent"
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <textarea
-          name="content"
-          rows="10"
-          value={form.content}
-          onChange={handleChange}
-          placeholder="Write your blog content..."
-          required
-          className="w-full p-3 border border-gray-300 rounded"
-        />
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Content
+              </label>
+              <textarea
+                name="content"
+                value={form.content}
+                onChange={handleChange}
+                placeholder="Write your blog content..."
+                required
+                rows={12}
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent resize-none"
+              />
+            </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
-        >
-          Publish
-        </button>
-      </form>
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="w-full bg-[#1ABC9C] hover:bg-[#16A085] text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              >
+                Publish Post
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

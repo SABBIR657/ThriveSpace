@@ -3,11 +3,14 @@ import axios from "../api/axios";
 import { Link } from "react-router-dom";
 import { CalendarDaysIcon, UserIcon } from "@heroicons/react/24/outline";
 import { FaRegThumbsUp } from "react-icons/fa";
+import SearchBar from "../components/SearchBar";
+import { useSearchParams } from "react-router-dom";
 
 export default function Home() {
   const [blogs, setBlogs] = useState([]);
-
   const [filter, setFilter] = useState("");
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") || "";
 
   const filteredBlogs = filter
     ? blogs.filter((blog) => blog.category === filter)
@@ -16,90 +19,126 @@ export default function Home() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("/blogs");
+        const res = await axios.get(
+          `/blogs${search ? `?search=${search}` : ""}`
+        );
         setBlogs(res.data);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
       }
     };
     fetchBlogs();
-  }, []);
+  }, [search]);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-semibold mb-6 text-center text-gray-800">
-        Latest Posts
-      </h1>
+    <div className="min-h-screen bg-[#ECF0F1]">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-8 text-center text-[#2C3E50]">
+          Latest Posts
+        </h1>
 
-      <div className="mb-6 flex gap-4 flex-wrap">
-        <button
-          onClick={() => setFilter("")}
-          className="px-3 py-1 bg-gray-200 rounded"
-        >
-          All
-        </button>
-        {[
-          "motivation",
-          "study",
-          "story",
-          "book",
-          "Productivity",
-          "Healthy Life",
-          "Career",
-          "Technology",
-          "Inspiration",
-          "Finance",
-        ].map((cat) => (
+        <SearchBar />
+
+        <div className="mb-8 flex gap-3 flex-wrap justify-center">
           <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200"
+            onClick={() => setFilter("")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              filter === "" 
+                ? "bg-[#2C3E50] text-white" 
+                : "bg-white text-[#2C3E50] hover:bg-gray-100"
+            }`}
           >
-            {cat}
+            All
           </button>
-        ))}
-      </div>
-
-      {blogs.length === 0 ? (
-        <p className="text-center text-gray-500">No blogs yet.</p>
-      ) : (
-        filteredBlogs.map((blog) => (
-          <div key={blog._id} className="border-b border-gray-200 pb-6 mb-8">
-            <Link
-              to={`/blogs/${blog._id}`}
-              className="text-2xl font-bold text-blue-700 hover:underline"
+          {[
+            "motivation",
+            "study",
+            "story",
+            "book",
+            "Productivity",
+            "Healthy Life",
+            "Career",
+            "Technology",
+            "Inspiration",
+            "Finance",
+          ].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                filter === cat 
+                  ? "bg-[#1ABC9C] text-white" 
+                  : "bg-white text-[#2C3E50] hover:bg-gray-100"
+              }`}
             >
-              {blog.title}
-            </Link>
+              {cat}
+            </button>
+          ))}
+        </div>
 
-            <div className="flex items-center text-sm text-gray-500 mt-1 gap-4">
-              <span className="flex items-center gap-1">
-                <UserIcon className="h-4 w-4" />
-                {blog.user?.username || "Unknown"}
-              </span>
-              <span className="flex items-center gap-1">
-                <CalendarDaysIcon className="h-4 w-4" />
-                {new Date(blog.createdAt).toLocaleDateString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <FaRegThumbsUp />
-                {blog.likes?.length || 0}
-              </span>
-            </div>
-
-            <p className="mt-3 text-gray-700 line-clamp-3">
-              {blog.content.slice(0, 300)}...
-            </p>
-
-            <Link
-              to={`/blogs/${blog._id}`}
-              className="text-sm text-blue-600 hover:underline mt-2 inline-block"
+        {blogs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No blogs found.</p>
+            <Link 
+              to="/create" 
+              className="mt-4 inline-block bg-[#1ABC9C] hover:bg-[#16A085] text-white px-6 py-2 rounded transition-colors"
             >
-              Read more →
+              Create Your First Post
             </Link>
           </div>
-        ))
-      )}
+        ) : (
+          <div className="space-y-8">
+            {filteredBlogs.map((blog) => (
+              <div 
+                key={blog._id} 
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 bg-[#F1C40F] text-[#2C3E50] text-xs font-semibold rounded-full">
+                    {blog.category}
+                  </span>
+                </div>
+                
+                <Link to={`/blogs/${blog._id}`}>
+                  <h2 className="text-2xl font-bold text-[#2C3E50] hover:text-[#1ABC9C] transition-colors">
+                    {blog.title}
+                  </h2>
+                </Link>
+
+                <div className="flex items-center text-sm text-gray-500 mt-3 gap-4">
+                  <span className="flex items-center gap-1">
+                    <UserIcon className="h-4 w-4" />
+                    {blog.user?.username || "Unknown"}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CalendarDaysIcon className="h-4 w-4" />
+                    {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FaRegThumbsUp />
+                    {blog.likes?.length || 0} likes
+                  </span>
+                </div>
+
+                <p className="mt-4 text-gray-700 line-clamp-3 leading-relaxed">
+                  {blog.content.slice(0, 300)}...
+                </p>
+
+                <Link
+                  to={`/blogs/${blog._id}`}
+                  className="mt-4 inline-block text-[#1ABC9C] hover:text-[#16A085] font-medium transition-colors"
+                >
+                  Continue reading →
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

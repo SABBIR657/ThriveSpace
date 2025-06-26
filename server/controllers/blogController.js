@@ -22,16 +22,27 @@ exports.createBlog = async (req, res) =>{
 
 //get all blogs
 exports.getAllBlogs = async (req, res) =>{
-    try {
-        const blogs = await Blog.find()
-        .populate('user', 'username')
-        .populate({path:'comments', populate:{path: 'user', select: 'username'}})
-        .sort({ createdAt: -1 });
+   try {
+    const { search } = req.query;
 
-        res.json(blogs);
-    }catch(err){
-        res.status(500).json({message:'error fetching blogs', error:err.message});
-    }
+    const query = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const blogs = await Blog.find(query)
+      .populate('user', 'username')
+      .populate({ path: 'comments', populate: { path: 'user', select: 'username' } })
+      .sort({ createdAt: -1 });
+
+    res.json(blogs);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching blogs', error: err.message });
+  }
 };
 
 //get blog by ID
