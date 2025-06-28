@@ -123,22 +123,27 @@ export default function BlogDetails() {
                 {blog.category}
               </span>
 
-              {user && blog.user && user._id === blog.user._id && (
-                <div className="flex gap-4">
-                  <Link
-                    to={`/blogs/${blog._id}/edit`}
-                    className="flex items-center gap-1 text-[#1ABC9C] hover:text-[#16A085] font-medium"
-                  >
-                    <FaRegEdit className="h-4 w-4" /> Edit
-                  </Link>
-                  <button
-                    onClick={handleDelete}
-                    className="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium"
-                  >
-                    <FaTrashAlt className="h-4 w-4" /> Delete
-                  </button>
-                </div>
-              )}
+              {user &&
+                blog.user &&
+                (user._id === blog.user._id || user.role === "admin") && (
+                  <div className="flex gap-4">
+                    {user._id === blog.user._id && (
+                      <Link
+                        to={`/blogs/${blog._id}/edit`}
+                        className="flex items-center gap-1 text-[#1ABC9C] hover:text-[#16A085] font-medium"
+                      >
+                        <FaRegEdit className="h-4 w-4" /> Edit
+                      </Link>
+                    )}
+
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium"
+                    >
+                      <FaTrashAlt className="h-4 w-4" /> Delete
+                    </button>
+                  </div>
+                )}
             </div>
 
             <h1 className="text-3xl font-bold text-[#2C3E50] mb-4">

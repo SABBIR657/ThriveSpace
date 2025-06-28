@@ -9,8 +9,10 @@ likeBlog,
 commentOnBlog,
 updateBlog,
 deleteBlog
-} = require('../controllers/blogController')
-const sanitize = require('../middlewares/sanitize')
+} = require('../controllers/blogController');
+const sanitize = require('../middlewares/sanitize');
+const {isAdmin} = require("../middlewares/adminMiddleware");
+
 
 
 // Public - Get all blogs
@@ -33,6 +35,12 @@ router.put('/:id', auth, updateBlog);
 
 //delete blog
 router.delete('/:id', auth, deleteBlog);
+
+//admin: Get all blogs 
+router.get("/admin/all", auth, isAdmin, getAllBlogs );
+
+//admin: delete any blog
+router.delete('/admin/delete/:id', auth, isAdmin, deleteBlog);
 
 
 module.exports = router;

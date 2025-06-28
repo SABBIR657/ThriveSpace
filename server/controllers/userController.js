@@ -46,6 +46,33 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+
+    //admin login via env
+    if(
+        email === process.env.ADMIN_EMAIL &&
+        password === process.env.ADMIN_PASSWORD
+    ){
+        const adminPayload = { id: "admin-id", role: "admin" };
+         const token = jwt.sign(adminPayload, process.env.JWT_SECRET,{
+            expiresIn:"7d",
+         });
+
+         res.cookie("token", token,{
+            httpOnly:true,
+            sameSite:"Lax",
+            secure:process.env.NODE_ENV === "production",
+             maxAge: 7 * 24 * 60 * 60 * 1000,
+         });
+
+         return res.json({
+         _id:"admin-id",
+         username: process.env.ADMIN_USERNAME,
+         email: process.env.ADMIN_EMAIL,
+         role:"admin",
+         });
+    }
+
+    //regular user login
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password)))
       return res.status(401).json({ message: 'Invalid credentials' });

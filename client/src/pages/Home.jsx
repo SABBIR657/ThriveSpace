@@ -43,8 +43,8 @@ export default function Home() {
           <button
             onClick={() => setFilter("")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === "" 
-                ? "bg-[#2C3E50] text-white" 
+              filter === ""
+                ? "bg-[#2C3E50] text-white"
                 : "bg-white text-[#2C3E50] hover:bg-gray-100"
             }`}
           >
@@ -66,8 +66,8 @@ export default function Home() {
               key={cat}
               onClick={() => setFilter(cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                filter === cat 
-                  ? "bg-[#1ABC9C] text-white" 
+                filter === cat
+                  ? "bg-[#1ABC9C] text-white"
                   : "bg-white text-[#2C3E50] hover:bg-gray-100"
               }`}
             >
@@ -79,8 +79,8 @@ export default function Home() {
         {blogs.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No blogs found.</p>
-            <Link 
-              to="/create" 
+            <Link
+              to="/create"
               className="mt-4 inline-block bg-[#1ABC9C] hover:bg-[#16A085] text-white px-6 py-2 rounded transition-colors"
             >
               Create Your First Post
@@ -89,8 +89,8 @@ export default function Home() {
         ) : (
           <div className="space-y-8">
             {filteredBlogs.map((blog) => (
-              <div 
-                key={blog._id} 
+              <div
+                key={blog._id}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center gap-2 mb-2">
@@ -98,7 +98,7 @@ export default function Home() {
                     {blog.category}
                   </span>
                 </div>
-                
+
                 <Link to={`/blogs/${blog._id}`}>
                   <h2 className="text-2xl font-bold text-[#2C3E50] hover:text-[#1ABC9C] transition-colors">
                     {blog.title}
@@ -112,10 +112,10 @@ export default function Home() {
                   </span>
                   <span className="flex items-center gap-1">
                     <CalendarDaysIcon className="h-4 w-4" />
-                    {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(blog.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </span>
                   <span className="flex items-center gap-1">
@@ -124,9 +124,15 @@ export default function Home() {
                   </span>
                 </div>
 
-                <p className="mt-4 text-gray-700 line-clamp-3 leading-relaxed">
-                  {blog.content.slice(0, 300)}...
-                </p>
+                <div
+                  className="mt-4 text-gray-700 line-clamp-3 leading-relaxed blog-snippet"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      blog.content.length > 300
+                        ? blog.content.slice(0, 300) + "..."
+                        : blog.content,
+                  }}
+                />
 
                 <Link
                   to={`/blogs/${blog._id}`}
