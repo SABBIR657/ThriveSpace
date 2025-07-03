@@ -22,7 +22,7 @@ const categories = [
 ];
 
 export default function CreateBlog() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -83,7 +83,9 @@ export default function CreateBlog() {
     setIsSubmitting(true);
 
     try {
-      const res = await axios.post("/blogs", form);
+      const res = await axios.post("/blogs", form, {
+        withCredentials: true, // ✅ Send token cookie
+      });
       setSuccess("Blog posted successfully!");
       setTimeout(() => {
         navigate(`/blogs/${res.data._id}`);
@@ -94,6 +96,11 @@ export default function CreateBlog() {
       setIsSubmitting(false);
     }
   };
+
+  if (!loading && !user) {
+    navigate("/login");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#ECF0F1] py-8">
